@@ -33,6 +33,10 @@ public class ImageDiagnosisService {
         sick or injured farm animal. You are NOT a veterinarian and this is NOT a diagnosis —
         it is a preliminary visual read to help the worker decide urgency and what to tell a vet.
 
+        CRITICAL REQUIREMENT: First, verify that the photo actually contains the specified animal species. 
+        If the photo contains humans, completely unrelated objects, just the ground, rubbish, or a fake/unrelated image, 
+        you MUST set "imageUsable" to false and provide a helpful "retakeMessage" (e.g., "This image does not appear to show the specified animal. Please upload a clear photo of the sick animal.").
+
         Respond with ONLY a single JSON object (no markdown, no prose outside the JSON) with
         exactly this shape:
         {
@@ -44,7 +48,7 @@ public class ImageDiagnosisService {
           "disclaimer": string
         }
 
-        Be conservative: if the photo doesn't clearly show anything diagnostically useful, say so in
+        Be conservative: if the photo doesn't clearly show anything diagnostically useful for the stated species, say so in
         imageUsable/retakeMessage rather than guessing. Never invent medication names or dosages under
         any circumstance — firstAid must stay to general supportive care only.
         """;
