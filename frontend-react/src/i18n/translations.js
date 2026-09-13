@@ -413,6 +413,117 @@ export const translations = {
   },
 }
 
+export const vaccineSchedule = {
+  en: {
+    cattle: [
+      { age: '4 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'First dose at 4 months or above' },
+      { age: '6 Months', name: 'Haemorrhagic Septicaemia (HS)', booster: 'Annually before monsoon', notes: 'Critical in endemic areas' },
+      { age: '6 Months', name: 'Black Quarter (BQ)', booster: 'Annually before monsoon', notes: 'Usually given along with HS' },
+      { age: '4 to 8 Months', name: 'Brucellosis', booster: 'Once in a lifetime', notes: 'Given to female calves only' },
+    ],
+    buffalo: [
+      { age: '4 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'First dose at 4 months or above' },
+      { age: '6 Months', name: 'Haemorrhagic Septicaemia (HS)', booster: 'Annually before monsoon', notes: 'Buffaloes are highly susceptible' },
+      { age: '6 Months', name: 'Black Quarter (BQ)', booster: 'Annually before monsoon', notes: 'Usually given along with HS' },
+      { age: '4 to 8 Months', name: 'Brucellosis', booster: 'Once in a lifetime', notes: 'Given to female calves only' },
+    ],
+    goat: [
+      { age: '3 Months', name: 'Peste des Petits Ruminants (PPR)', booster: 'Once in 3 years', notes: 'Highly contagious, strict adherence required' },
+      { age: '3 Months', name: 'Goat Pox', booster: 'Annually', notes: 'Endemic areas only' },
+      { age: '4 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'First dose at 4 months' },
+      { age: '4 Months', name: 'Enterotoxemia (ET)', booster: 'Annually before monsoon', notes: 'Requires booster 15 days after primary dose' },
+    ],
+    sheep: [
+      { age: '3 Months', name: 'Peste des Petits Ruminants (PPR)', booster: 'Once in 3 years', notes: 'Highly contagious viral disease' },
+      { age: '3 Months', name: 'Sheep Pox', booster: 'Annually', notes: 'Very important for wool breeds' },
+      { age: '4 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'First dose at 4 months' },
+      { age: '4 Months', name: 'Enterotoxemia (ET)', booster: 'Annually before monsoon', notes: 'Requires booster 15 days after primary dose' },
+    ],
+    poultry: [
+      { age: 'Day 1', name: "Marek's Disease", booster: 'None', notes: 'Given at hatchery (Subcutaneous)' },
+      { age: 'Day 5-7', name: 'Newcastle Disease (Ranikhet) - F Strain', booster: 'Day 28 (Lasota strain)', notes: 'Eye drop or drinking water' },
+      { age: 'Day 14-16', name: 'Infectious Bursal Disease (IBD)', booster: 'Day 21-24', notes: 'Drinking water' },
+      { age: 'Week 6-8', name: 'Fowl Pox', booster: 'None', notes: 'Wing web puncture' },
+    ],
+    pig: [
+      { age: '2 Months', name: 'Classical Swine Fever', booster: 'Annually', notes: 'Core vaccine' },
+      { age: '2 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'Important in endemic areas' },
+    ]
+  },
+  hi: {
+    cattle: [
+      { age: '4 महीने', name: 'खुरपका-मुंहपका रोग (FMD)', booster: 'हर 6 महीने में', notes: 'पहली खुराक 4 महीने या उससे अधिक उम्र में' },
+      { age: '6 महीने', name: 'गलघोंटू (HS)', booster: 'हर साल मानसून से पहले', notes: 'स्थानिक क्षेत्रों में महत्वपूर्ण' },
+      { age: '6 महीने', name: 'लंगड़ा बुखार (BQ)', booster: 'हर साल मानसून से पहले', notes: 'आमतौर पर HS के साथ दिया जाता है' },
+      { age: '4 से 8 महीने', name: 'ब्रुसेलोसिस', booster: 'जीवन में एक बार', notes: 'केवल मादा बछड़ों को दिया जाता है' },
+    ],
+    buffalo: [
+      { age: '4 महीने', name: 'खुरपका-मुंहपका रोग (FMD)', booster: 'हर 6 महीने में', notes: 'पहली खुराक 4 महीने या उससे अधिक उम्र में' },
+      { age: '6 महीने', name: 'गलघोंटू (HS)', booster: 'हर साल मानसून से पहले', notes: 'भैंसें अत्यधिक संवेदनशील होती हैं' },
+      { age: '6 महीने', name: 'लंगड़ा बुखार (BQ)', booster: 'हर साल मानसून से पहले', notes: 'आमतौर पर HS के साथ दिया जाता है' },
+      { age: '4 से 8 महीने', name: 'ब्रुसेलोसिस', booster: 'जीवन में एक बार', notes: 'केवल मादा बछड़ों को दिया जाता है' },
+    ],
+    goat: [
+      { age: '3 महीने', name: 'पीपीआर (बकरी प्लेग)', booster: '3 साल में एक बार', notes: 'अत्यधिक संक्रामक, सख्त अनुपालन आवश्यक' },
+      { age: '3 महीने', name: 'गोट पॉक्स', booster: 'सालाना', notes: 'केवल स्थानिक क्षेत्रों में' },
+      { age: '4 महीने', name: 'खुरपका-मुंहपका रोग (FMD)', booster: 'हर 6 महीने में', notes: 'पहली खुराक 4 महीने में' },
+      { age: '4 महीने', name: 'फड़किया (ET)', booster: 'हर साल मानसून से पहले', notes: 'प्राथमिक खुराक के 15 दिन बाद बूस्टर आवश्यक' },
+    ],
+    sheep: [
+      { age: '3 महीने', name: 'पीपीआर (भेड़ प्लेग)', booster: '3 साल में एक बार', notes: 'अत्यधिक संक्रामक वायरल बीमारी' },
+      { age: '3 महीने', name: 'शीप पॉक्स', booster: 'सालाना', notes: 'ऊन वाली नस्लों के लिए बहुत महत्वपूर्ण' },
+      { age: '4 महीने', name: 'खुरपका-मुंहपका रोग (FMD)', booster: 'हर 6 महीने में', notes: 'पहली खुराक 4 महीने में' },
+      { age: '4 महीने', name: 'फड़किया (ET)', booster: 'हर साल मानसून से पहले', notes: 'प्राथमिक खुराक के 15 दिन बाद बूस्टर आवश्यक' },
+    ],
+    poultry: [
+      { age: 'दिन 1', name: 'मारेक रोग', booster: 'कोई नहीं', notes: 'हैचरी में दिया जाता है (उपचर्म)' },
+      { age: 'दिन 5-7', name: 'रानीखेत रोग (F स्ट्रेन)', booster: 'दिन 28 (लसोटा स्ट्रेन)', notes: 'आंख में बूंद या पीने के पानी में' },
+      { age: 'दिन 14-16', name: 'गंबोरो (IBD)', booster: 'दिन 21-24', notes: 'पीने के पानी में' },
+      { age: 'सप्ताह 6-8', name: 'फाउल पॉक्स', booster: 'कोई नहीं', notes: 'पंख के जाले में पंचर' },
+    ],
+    pig: [
+      { age: '2 महीने', name: 'क्लासिकल स्वाइन फीवर', booster: 'सालाना', notes: 'मुख्य टीका' },
+      { age: '2 महीने', name: 'खुरपका-मुंहपका रोग (FMD)', booster: 'हर 6 महीने में', notes: 'स्थानिक क्षेत्रों में महत्वपूर्ण' },
+    ]
+  },
+  mr: {
+    cattle: [
+      { age: '४ महिने', name: 'लाळ्या खुरकूत (FMD)', booster: 'दर ६ महिन्यांनी', notes: 'पहिला डोस ४ महिने किंवा त्याहून अधिक वयात' },
+      { age: '६ महिने', name: 'घटसर्प (HS)', booster: 'पावसाळ्यापूर्वी दरवर्षी', notes: 'स्थानिक भागात अत्यंत महत्त्वाचे' },
+      { age: '६ महिने', name: 'फऱ्या (BQ)', booster: 'पावसाळ्यापूर्वी दरवर्षी', notes: 'बहुधा HS सोबत दिले जाते' },
+      { age: '४ ते ८ महिने', name: 'ब्रुसेलोसिस', booster: 'आयुष्यात एकदा', notes: 'केवळ मादी वासरांना दिले जाते' },
+    ],
+    buffalo: [
+      { age: '४ महिने', name: 'लाळ्या खुरकूत (FMD)', booster: 'दर ६ महिन्यांनी', notes: 'पहिला डोस ४ महिने किंवा त्याहून अधिक वयात' },
+      { age: '६ महिने', name: 'घटसर्प (HS)', booster: 'पावसाळ्यापूर्वी दरवर्षी', notes: 'म्हशी या रोगास अत्यंत संवेदनशील असतात' },
+      { age: '६ महिने', name: 'फऱ्या (BQ)', booster: 'पावसाळ्यापूर्वी दरवर्षी', notes: 'बहुधा HS सोबत दिले जाते' },
+      { age: '४ ते ८ महिने', name: 'ब्रुसेलोसिस', booster: 'आयुष्यात एकदा', notes: 'केवळ मादी वासरांना दिले जाते' },
+    ],
+    goat: [
+      { age: '३ महिने', name: 'पीपीआर (शेळी प्लेग)', booster: '३ वर्षांतून एकदा', notes: 'अत्यंत संसर्गजन्य, कठोर पालन आवश्यक' },
+      { age: '३ महिने', name: 'गोट पॉक्स', booster: 'दरवर्षी', notes: 'केवळ स्थानिक भागात' },
+      { age: '४ महिने', name: 'लाळ्या खुरकूत (FMD)', booster: 'दर ६ महिन्यांनी', notes: 'पहिला डोस ४ महिन्यात' },
+      { age: '४ महिने', name: 'आंत्रविषार (ET)', booster: 'पावसाळ्यापूर्वी दरवर्षी', notes: 'प्राथमिक डोस नंतर १५ दिवसांनी बूस्टर आवश्यक' },
+    ],
+    sheep: [
+      { age: '३ महिने', name: 'पीपीआर (मेंढी प्लेग)', booster: '३ वर्षांतून एकदा', notes: 'अत्यंत संसर्गजन्य विषाणूजन्य आजार' },
+      { age: '३ महिने', name: 'शीप पॉक्स', booster: 'दरवर्षी', notes: 'लोकर देणाऱ्या जातींसाठी खूप महत्त्वाचे' },
+      { age: '४ महिने', name: 'लाळ्या खुरकूत (FMD)', booster: 'दर ६ महिन्यांनी', notes: 'पहिला डोस ४ महिन्यात' },
+      { age: '४ महिने', name: 'आंत्रविषार (ET)', booster: 'पावसाळ्यापूर्वी दरवर्षी', notes: 'प्राथमिक डोस नंतर १५ दिवसांनी बूस्टर आवश्यक' },
+    ],
+    poultry: [
+      { age: 'दिवस १', name: 'मारेक्स रोग', booster: 'नाही', notes: 'हॅचरीमध्ये दिले जाते (सबक्युटेनियस)' },
+      { age: 'दिवस ५-७', name: 'राणीखेत (F स्ट्रेन)', booster: 'दिवस २८ (लसोटा स्ट्रेन)', notes: 'डोळ्यात थेंब किंवा पिण्याच्या पाण्यात' },
+      { age: 'दिवस १४-१६', name: 'गंबोरो (IBD)', booster: 'दिवस २१-२४', notes: 'पिण्याच्या पाण्यात' },
+      { age: 'आठवडा ६-८', name: 'फाउल पॉक्स', booster: 'नाही', notes: 'पंखाच्या वेबमध्ये पंक्चर' },
+    ],
+    pig: [
+      { age: '२ महिने', name: 'क्लासिकल स्वाइन फिव्हर', booster: 'दरवर्षी', notes: 'मुख्य लस' },
+      { age: '२ महिने', name: 'लाळ्या खुरकूत (FMD)', booster: 'दर ६ महिन्यांनी', notes: 'स्थानिक भागात महत्त्वाचे' },
+    ]
+  }
+}
+
 export const languageNames = { en: 'English', hi: 'हिंदी', mr: 'मराठी' }
 
 // Shared lookup dictionaries used across pages so data-driven values
