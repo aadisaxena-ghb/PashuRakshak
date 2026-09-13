@@ -1,46 +1,11 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
-import { species as speciesLabels } from '../i18n/translations.js'
+import { species as speciesLabels, vaccineSchedule } from '../i18n/translations.js'
 
 const SPECIES = ['cattle', 'buffalo', 'goat', 'sheep', 'poultry', 'pig']
 
-const VACCINE_SCHEDULE = {
-  cattle: [
-    { age: '4 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'First dose at 4 months or above' },
-    { age: '6 Months', name: 'Haemorrhagic Septicaemia (HS)', booster: 'Annually before monsoon', notes: 'Critical in endemic areas' },
-    { age: '6 Months', name: 'Black Quarter (BQ)', booster: 'Annually before monsoon', notes: 'Usually given along with HS' },
-    { age: '4 to 8 Months', name: 'Brucellosis', booster: 'Once in a lifetime', notes: 'Given to female calves only' },
-  ],
-  buffalo: [
-    { age: '4 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'First dose at 4 months or above' },
-    { age: '6 Months', name: 'Haemorrhagic Septicaemia (HS)', booster: 'Annually before monsoon', notes: 'Buffaloes are highly susceptible' },
-    { age: '6 Months', name: 'Black Quarter (BQ)', booster: 'Annually before monsoon', notes: 'Usually given along with HS' },
-    { age: '4 to 8 Months', name: 'Brucellosis', booster: 'Once in a lifetime', notes: 'Given to female calves only' },
-  ],
-  goat: [
-    { age: '3 Months', name: 'Peste des Petits Ruminants (PPR)', booster: 'Once in 3 years', notes: 'Highly contagious, strict adherence required' },
-    { age: '3 Months', name: 'Goat Pox', booster: 'Annually', notes: 'Endemic areas only' },
-    { age: '4 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'First dose at 4 months' },
-    { age: '4 Months', name: 'Enterotoxemia (ET)', booster: 'Annually before monsoon', notes: 'Requires booster 15 days after primary dose' },
-  ],
-  sheep: [
-    { age: '3 Months', name: 'Peste des Petits Ruminants (PPR)', booster: 'Once in 3 years', notes: 'Highly contagious viral disease' },
-    { age: '3 Months', name: 'Sheep Pox', booster: 'Annually', notes: 'Very important for wool breeds' },
-    { age: '4 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'First dose at 4 months' },
-    { age: '4 Months', name: 'Enterotoxemia (ET)', booster: 'Annually before monsoon', notes: 'Requires booster 15 days after primary dose' },
-  ],
-  poultry: [
-    { age: 'Day 1', name: "Marek's Disease", booster: 'None', notes: 'Given at hatchery (Subcutaneous)' },
-    { age: 'Day 5-7', name: 'Newcastle Disease (Ranikhet) - F Strain', booster: 'Day 28 (Lasota strain)', notes: 'Eye drop or drinking water' },
-    { age: 'Day 14-16', name: 'Infectious Bursal Disease (IBD)', booster: 'Day 21-24', notes: 'Drinking water' },
-    { age: 'Week 6-8', name: 'Fowl Pox', booster: 'None', notes: 'Wing web puncture' },
-  ],
-  pig: [
-    { age: '2 Months', name: 'Classical Swine Fever', booster: 'Annually', notes: 'Core vaccine' },
-    { age: '2 Months', name: 'Foot and Mouth Disease (FMD)', booster: 'Every 6 months', notes: 'Important in endemic areas' },
-  ]
-}
+// Vaccine schedule is now imported from translations.js
 
 export default function VaccinationGuide() {
   const { t, lang } = useLanguage()
@@ -48,7 +13,10 @@ export default function VaccinationGuide() {
   const speciesDict = speciesLabels[lang] || speciesLabels.en
   
   const [selectedSpecies, setSelectedSpecies] = useState('cattle')
-  const schedule = VACCINE_SCHEDULE[selectedSpecies] || []
+  const schedule = useMemo(() => {
+    const byLang = vaccineSchedule[lang] || vaccineSchedule.en
+    return byLang[selectedSpecies] || []
+  }, [lang, selectedSpecies])
 
   return (
     <>
