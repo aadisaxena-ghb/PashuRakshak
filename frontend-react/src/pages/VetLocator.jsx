@@ -216,8 +216,7 @@ export default function VetLocator() {
 
       {!placesConfigured && (
         <p className="status-msg" style={{ marginBottom: 12 }}>
-          Live vet clinic discovery isn't turned on for this deployment yet (needs a Google Places API key in
-          the backend's application.properties) — showing manually registered vets only.
+          {t.locator.liveNotConfigured}
         </p>
       )}
 
@@ -240,7 +239,7 @@ export default function VetLocator() {
                 ) : v.mapsUrl ? (
                   <a className="btn-secondary" href={v.mapsUrl} target="_blank" rel="noreferrer">
                     <ExternalLink size={13} style={{ marginRight: 6, verticalAlign: -2 }} />
-                    Maps
+                    {t.locator.mapsBtn}
                   </a>
                 ) : null}
               </div>
@@ -260,7 +259,7 @@ export default function VetLocator() {
           />
           {userLocation && (
             <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
-              <Popup>You are here</Popup>
+              <Popup>{t.locator.youAreHere}</Popup>
             </Marker>
           )}
           {allVets.map((v) => {
@@ -277,7 +276,7 @@ export default function VetLocator() {
                   <strong>{v.name}</strong><br />
                   {v.subtitle}<br />
                   {v.phone && <a href={`tel:${v.phone}`}>{v.phone}</a>}
-                  {v.mapsUrl && <a href={v.mapsUrl} target="_blank" rel="noreferrer">Open in Google Maps</a>}
+                  {v.mapsUrl && <a href={v.mapsUrl} target="_blank" rel="noreferrer">{t.locator.openInMaps}</a>}
                 </Popup>
               </Marker>
             )
@@ -289,8 +288,8 @@ export default function VetLocator() {
         <p className="status-msg" style={{ marginTop: 10 }}>
           <MapPin size={14} style={{ verticalAlign: -2, marginRight: 4 }} />
           {placesConfigured
-            ? 'No veterinary clinics found nearby — try a different location, or add one from the Veterinary desk.'
-            : 'No veterinarians have a saved location yet — add one from the Veterinary desk and capture its location.'}
+            ? t.locator.noVetsNearby
+            : t.locator.noVetsRegistered}
         </p>
       )}
     </section>
