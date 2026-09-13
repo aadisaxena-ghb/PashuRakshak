@@ -134,6 +134,8 @@ export default function ReportCase() {
     { label: 'मराठी', value: 'mr-IN' },
   ]
 
+  const baseTextRef = useRef('')
+
   const startVoice = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
@@ -143,9 +145,14 @@ export default function ReportCase() {
     setVoiceError(null)
     const recognition = new SpeechRecognition()
     recognition.lang = voiceLang
-    recognition.continuous = true
+    // On Android, continuous + interim causes duplicate words.
+    // Setting continuous false makes it act like standard Google Voice Search.
+    recognition.continuous = false
     recognition.interimResults = true
     recognitionRef.current = recognition
+    
+    // Save existing text so we don't overwrite it
+    baseTextRef.current = customSymptom
 
     recognition.onstart = () => setVoiceListening(true)
     recognition.onend = () => setVoiceListening(false)
@@ -154,11 +161,15 @@ export default function ReportCase() {
       setVoiceListening(false)
     }
     recognition.onresult = (e) => {
-      let transcript = ''
+      let currentSessionTranscript = ''
       for (let i = 0; i < e.results.length; i++) {
-        transcript += e.results[i][0].transcript
+        currentSessionTranscript += e.results[i][0].transcript
       }
-      setCustomSymptom(transcript)
+      
+      // To avoid duplicates, we combine the text that existed before clicking the mic
+      // with the clean transcript of the current session.
+      const base = baseTextRef.current ? baseTextRef.current + ' ' : ''
+      setCustomSymptom(base + currentSessionTranscript)
     }
     recognition.start()
   }
