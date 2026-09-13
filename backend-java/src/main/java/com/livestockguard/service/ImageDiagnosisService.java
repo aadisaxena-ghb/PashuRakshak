@@ -61,21 +61,18 @@ public class ImageDiagnosisService {
     }
 
     public boolean isConfigured() {
-        return true;
+        return apiKey != null && !apiKey.isBlank();
     }
 
     public Map<String, Object> analyze(ImageAnalysisRequest request) {
-        // 1. If Gemini API Key is configured and looks valid, try calling Gemini Vision
-        if (apiKey != null && !apiKey.isBlank()) {
-            try {
-                return callGemini(request);
-            } catch (Exception e) {
-                System.err.println("Gemini API call returned exception, using intelligent diagnostic fallback: " + e.getMessage());
-            }
+        if (!isConfigured()) {
+            throw new IllegalStateException("Gemini API key is not configured.");
         }
-
-        // 2. Intelligent Presentation Fallback (ensures 100% demo uptime without failing)
-        return generateDemoFallback(request);
+        try {
+            return callGemini(request);
+        } catch (Exception e) {
+            throw new ImageDiagnosisException("Gemini API call failed: " + e.getMessage(), e);
+        }
     }
 
     private Map<String, Object> callGemini(ImageAnalysisRequest request) throws Exception {
@@ -135,64 +132,6 @@ public class ImageDiagnosisService {
         @SuppressWarnings("unchecked")
         Map<String, Object> parsed = objectMapper.readValue(text, Map.class);
         return new LinkedHashMap<>(parsed);
-    }
-
-    private Map<String, Object> generateDemoFallback(ImageAnalysisRequest request) {
-        String species = request.getSpecies() != null ? request.getSpecies().toLowerCase() : "cattle";
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("imageUsable", true);
-        res.put("retakeMessage", null);
-
-        if (species.contains("cattle") || species.contains("cow") || species.contains("buffalo")) {
-            res.put("visibleSigns", List.of(
-                    "Circumscribed nodular skin lesions on neck and flank region",
-                    "Mild ocular and nasal serous discharge",
-                    "Localized superficial swelling and lethargic posture"
-            ));
-            res.put("possibleConditions", List.of(
-                    Map.of("name", "Lumpy Skin Disease (LSD)", "likelihood", "high", "description", "Characteristic cutaneous nodules across the body surface with fever history"),
-                    Map.of("name", "Bovine Papillomatosis", "likelihood", "medium", "description", "Wart-like skin eruptions commonly seen in dairy livestock"),
-                    Map.of("name", "Insect Bite Hypersensitivity / Urticaria", "likelihood", "low", "description", "Acute localized cutaneous allergic reaction")
-            ));
-            res.put("firstAid", List.of(
-                    "Isolate the animal in a clean, shaded enclosure away from the herd to prevent transmission",
-                    "Apply antiseptic fly-repellent ointment (e.g. neem oil/iodine solution) over open skin lesions",
-                    "Ensure continuous access to fresh clean water and easily digestible green fodder",
-                    "Contact the local veterinary officer immediately for formal examination and blood sampling"
-            ));
-        } else if (species.contains("goat") || species.contains("sheep")) {
-            res.put("visibleSigns", List.of(
-                    "Erosive crusts and pustular lesions around the oral commissures and lips",
-                    "Mild salivation and reluctance to graze"
-            ));
-            res.put("possibleConditions", List.of(
-                    Map.of("name", "Contagious Ecthyma (Orf)", "likelihood", "high", "description", "Proliferative scabby mouth lesions typical in small ruminants"),
-                    Map.of("name", "Peste des Petits Ruminants (PPR) Suspect", "likelihood", "medium", "description", "Viral infection causing oral necrosis and mucosal congestion"),
-                    Map.of("name", "Goat Pox", "likelihood", "low", "description", "Generalized papular eruptions on skin and oral mucosa")
-            ));
-            res.put("firstAid", List.of(
-                    "Provide soft gruel and clean water as mastication is painful due to lip lesions",
-                    "Apply non-irritant soothing antiseptic ointment (potassium permanganate 1:1000 wash) on scabs",
-                    "Strictly isolate from other goats/sheep and wash hands after handling"
-            ));
-        } else {
-            res.put("visibleSigns", List.of(
-                    "Visible localized swelling and irritation on the affected area",
-                    "Mild loss of hair/coat sheen around the lesion"
-            ));
-            res.put("possibleConditions", List.of(
-                    Map.of("name", "Superficial Cutaneous Infection", "likelihood", "medium", "description", "Localized bacterial or fungal dermatopathy"),
-                    Map.of("name", "Physical Trauma / Abrasion", "likelihood", "medium", "description", "Mechanical injury with secondary inflammation")
-            ));
-            res.put("firstAid", List.of(
-                    "Clean the affected area gently with mild saline solution",
-                    "Keep the animal in a dry, calm environment and monitor body temperature",
-                    "Consult a registered veterinarian for appropriate prescription"
-            ));
-        }
-
-        res.put("disclaimer", "This is an AI-assisted visual read for preliminary field triage — a physical visit by a registered veterinarian is essential for confirmation.");
-        return res;
     }
 
     public static class ImageDiagnosisException extends RuntimeException {
