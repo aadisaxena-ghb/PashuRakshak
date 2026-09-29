@@ -32,7 +32,11 @@ public class RiskAssessmentService {
     private final Path enginePath;
 
     public RiskAssessmentService(@Value("${livestockguard.risk-engine.path}") String enginePathProperty) {
-        this.enginePath = Path.of(enginePathProperty).toAbsolutePath().normalize();
+        Path p = Path.of(enginePathProperty).toAbsolutePath().normalize();
+        if (!java.nio.file.Files.exists(p) && java.nio.file.Files.exists(Path.of(p.toString() + ".exe"))) {
+            p = Path.of(p.toString() + ".exe");
+        }
+        this.enginePath = p;
     }
 
     public RiskEngineResult assess(String species,

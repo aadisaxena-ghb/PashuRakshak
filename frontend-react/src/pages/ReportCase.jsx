@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Phone, Navigation } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Phone, Navigation, Mic, MicOff, X } from 'lucide-react'
 import { api } from '../api/client.js'
 import RiskStamp from '../components/RiskStamp.jsx'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -7,6 +7,84 @@ import { species as speciesLabels, symptoms as symptomLabels, diseases as diseas
 import { SPECIES_SYMPTOMS } from '../utils/speciesSymptoms.js'
 
 const SPECIES = ['cattle', 'buffalo', 'goat', 'sheep', 'poultry', 'pig']
+
+// Temporary medication guide keyed by disease key
+const TEMP_MEDS = {
+  fmd: {
+    name: 'Foot & Mouth Disease',
+    meds: [
+      { drug: 'Povidone-Iodine wash', dose: 'Dilute 1:10 with water', freq: 'Wash affected hooves/mouth twice daily', note: 'Keep wounds clean and dry' },
+      { drug: 'Paracetamol (Veterinary)', dose: '15–20 mg/kg body weight', freq: 'Twice daily for fever', note: 'Do NOT use human tablets with additives' },
+      { drug: 'Vitamin B-complex injection', dose: '10–20 ml IM', freq: 'Once daily for 3 days', note: 'Supports recovery and appetite' },
+    ],
+  },
+  hs: {
+    name: 'Hemorrhagic Septicemia',
+    meds: [
+      { drug: 'Penicillin-Streptomycin (Vet)', dose: '5–10 mg/kg IM', freq: 'Twice daily for 5 days', note: 'Seek vet IMMEDIATELY — this disease is rapidly fatal' },
+      { drug: 'Antipyretic (Meloxicam Vet)', dose: '0.5 mg/kg SC/IM', freq: 'Once daily', note: 'To reduce fever and inflammation' },
+    ],
+  },
+  bq: {
+    name: 'Black Quarter',
+    meds: [
+      { drug: 'Penicillin G (Vet)', dose: '22,000 IU/kg IM', freq: 'Every 6–8 hrs (first 24 hrs)', note: 'Time-critical — must start within hours of symptoms' },
+      { drug: 'Anti-inflammatory (Flunixin)', dose: '1.1–2.2 mg/kg IV', freq: 'Once daily', note: 'For pain and swelling reduction' },
+    ],
+  },
+  anthrax: {
+    name: 'Anthrax',
+    meds: [
+      { drug: 'Penicillin G (Vet)', dose: '10,000–20,000 IU/kg IV', freq: 'Every 6 hrs for at least 5 days', note: '⚠️ Zoonotic risk — wear gloves, report to authorities' },
+    ],
+  },
+  ppr: {
+    name: 'Peste des Petits Ruminants',
+    meds: [
+      { drug: 'ORS (Oral Rehydration Salts)', dose: '2–4 L/day orally', freq: 'Throughout the day in small amounts', note: 'Prevents dehydration from diarrhea' },
+      { drug: 'Oxytetracycline (Vet)', dose: '10 mg/kg IM', freq: 'Once daily for 5 days', note: 'Controls secondary bacterial infections' },
+      { drug: 'Antipyretic (Paracetamol Vet)', dose: '10–15 mg/kg', freq: 'Twice daily', note: 'To manage high fever' },
+    ],
+  },
+  brucellosis: {
+    name: 'Brucellosis',
+    meds: [
+      { drug: 'Oxytetracycline (Vet)', dose: '10 mg/kg IM', freq: 'Once daily for 21 days', note: '⚠️ Zoonotic — avoid handling aborted material without gloves' },
+    ],
+  },
+  mastitis: {
+    name: 'Mastitis',
+    meds: [
+      { drug: 'Intramammary Antibiotic tube', dose: 'Per tube (follow label)', freq: 'After each milking for 3–5 days', note: 'Do not consume milk during treatment + 4 days after' },
+      { drug: 'Oxytocin (Vet)', dose: '10–20 IU IM', freq: 'Before milking to aid let-down', note: 'Helps flush bacteria' },
+    ],
+  },
+  bloat: {
+    name: 'Bloat / Ruminal Tympany',
+    meds: [
+      { drug: 'Simethicone / Tympanol', dose: '50–100 ml orally', freq: 'Single dose, repeat if no relief in 30 min', note: 'Walk the animal gently; keep head elevated' },
+      { drug: 'Turpentine Oil (1 tbsp in vegetable oil)', dose: '30–60 ml orally', freq: 'Single dose', note: 'Only if commercial anti-bloat unavailable' },
+    ],
+  },
+  default: {
+    name: 'General Supportive Care',
+    meds: [
+      { drug: 'ORS (Oral Rehydration Salts)', dose: '2–4 L/day', freq: 'Throughout the day', note: 'Prevents dehydration' },
+      { drug: 'Paracetamol (Veterinary)', dose: '15 mg/kg', freq: 'Twice daily for fever', note: 'Do NOT use human tablets' },
+      { drug: 'Vitamin B-complex injection', dose: '10 ml IM', freq: 'Once daily for 3 days', note: 'Boosts immunity and recovery' },
+    ],
+  },
+}
+
+function getTempMeds(possibleDiseasesJson) {
+  if (!possibleDiseasesJson) return TEMP_MEDS.default
+  try {
+    const diseases = JSON.parse(possibleDiseasesJson)
+    if (!diseases.length) return TEMP_MEDS.default
+    const topKey = diseases[0]?.key
+    return TEMP_MEDS[topKey] || TEMP_MEDS.default
+  } catch { return TEMP_MEDS.default }
+}
 
 const emptyForm = {
   species: 'cattle',
@@ -16,6 +94,9 @@ const emptyForm = {
   ownerPhone: '',
   village: '',
   vaccinated: false,
+  height: '',
+  weight: '',
+  unit: 'cm/kg',
   daysSinceOnset: '0',
   photoUrl: '',
 }
@@ -28,6 +109,7 @@ export default function ReportCase() {
   const [form, setForm] = useState(emptyForm)
   const symptomKeysForSpecies = SPECIES_SYMPTOMS[form.species] || SPECIES_SYMPTOMS.cattle
   const [symptoms, setSymptoms] = useState([])
+  const [customSymptom, setCustomSymptom] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
@@ -39,6 +121,63 @@ export default function ReportCase() {
   const [analyzingPhoto, setAnalyzingPhoto] = useState(false)
   const [photoAnalysis, setPhotoAnalysis] = useState(null)
   const [photoError, setPhotoError] = useState(null)
+
+  // Voice reporting state
+  const [voiceListening, setVoiceListening] = useState(false)
+  const [voiceLang, setVoiceLang] = useState('en-IN')
+  const [voiceError, setVoiceError] = useState(null)
+  const recognitionRef = useRef(null)
+
+  const VOICE_LANGS = [
+    { label: 'English', value: 'en-IN' },
+    { label: 'हिन्दी', value: 'hi-IN' },
+    { label: 'मराठी', value: 'mr-IN' },
+  ]
+
+  const baseTextRef = useRef('')
+
+  const startVoice = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setVoiceError('Voice input is not supported in this browser. Please use Chrome.')
+      return
+    }
+    setVoiceError(null)
+    const recognition = new SpeechRecognition()
+    recognition.lang = voiceLang
+    // On Android, continuous + interim causes duplicate words.
+    // Setting continuous false makes it act like standard Google Voice Search.
+    recognition.continuous = false
+    recognition.interimResults = true
+    recognitionRef.current = recognition
+    
+    // Save existing text so we don't overwrite it
+    baseTextRef.current = customSymptom
+
+    recognition.onstart = () => setVoiceListening(true)
+    recognition.onend = () => setVoiceListening(false)
+    recognition.onerror = (e) => {
+      setVoiceError('Microphone error: ' + e.error)
+      setVoiceListening(false)
+    }
+    recognition.onresult = (e) => {
+      let currentSessionTranscript = ''
+      for (let i = 0; i < e.results.length; i++) {
+        currentSessionTranscript += e.results[i][0].transcript
+      }
+      
+      // To avoid duplicates, we combine the text that existed before clicking the mic
+      // with the clean transcript of the current session.
+      const base = baseTextRef.current ? baseTextRef.current + ' ' : ''
+      setCustomSymptom(base + currentSessionTranscript)
+    }
+    recognition.start()
+  }
+
+  const stopVoice = () => {
+    recognitionRef.current?.stop()
+    setVoiceListening(false)
+  }
 
   const toggleSymptom = (key) => {
     setSymptoms((prev) => (prev.includes(key) ? prev.filter((s) => s !== key) : [...prev, key]))
@@ -117,8 +256,8 @@ export default function ReportCase() {
     setError(null)
     setResult(null)
 
-    if (symptoms.length === 0) {
-      setError('Select at least one symptom before submitting.')
+    if (symptoms.length === 0 && !customSymptom.trim()) {
+      setError('Select at least one symptom or describe your problem before submitting.')
       return
     }
     if (!form.ownerName.trim() || !form.village.trim()) {
@@ -138,15 +277,19 @@ export default function ReportCase() {
         latitude: coords?.latitude ?? null,
         longitude: coords?.longitude ?? null,
         vaccinated: form.vaccinated,
+        height: form.height ? Number(form.height) : null,
+        weight: form.weight ? Number(form.weight) : null,
+        unit: form.unit,
         daysSinceOnset: Number(form.daysSinceOnset || 0),
         photoUrl: form.photoUrl || null,
         photoAnalysisJson: photoAnalysis ? JSON.stringify(photoAnalysis) : null,
-        symptoms,
+        symptoms: customSymptom.trim() ? [...symptoms, customSymptom.trim()] : symptoms,
       }
       const created = await api.reportCase(payload)
       setResult(created)
       setForm(emptyForm)
       setSymptoms([])
+      setCustomSymptom('')
       setCoords(null)
       retakePhoto()
     } catch (err) {
@@ -226,6 +369,29 @@ export default function ReportCase() {
               </label>
             </div>
 
+            <div className="full section-box">
+              <label style={{ fontSize: 16, borderBottom: '1px solid var(--border)', paddingBottom: 8, marginBottom: 12 }}>
+                {t.report.animalSpecs || 'Animal Specifications (Optional)'}
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+                <div>
+                  <label>{t.report.unit || 'Unit'}</label>
+                  <select value={form.unit} onChange={e => setForm({...form, unit: e.target.value})}>
+                    <option value="cm/kg">{t.report.unitMetric || 'Metric (cm / kg)'}</option>
+                    <option value="inches/lbs">{t.report.unitImperial || 'Imperial (inches / lbs)'}</option>
+                  </select>
+                </div>
+                <div>
+                  <label>{t.report.height || 'Height'} ({form.unit.split('/')[0]})</label>
+                  <input type="number" step="any" min="0" value={form.height} onChange={e => setForm({...form, height: e.target.value})} placeholder="e.g. 150" />
+                </div>
+                <div>
+                  <label>{t.report.weight || 'Weight'} ({form.unit.split('/')[1]})</label>
+                  <input type="number" step="any" min="0" value={form.weight} onChange={e => setForm({...form, weight: e.target.value})} placeholder="e.g. 500" />
+                </div>
+              </div>
+            </div>
+
             <div className="full">
               <label>{t.report.symptomsLabel}</label>
               <div className="symptom-grid">
@@ -240,6 +406,62 @@ export default function ReportCase() {
                     {symptomDict[key]}
                   </label>
                 ))}
+              </div>
+              
+              <div style={{ marginTop: 18 }}>
+                {/* Voice Reporting */}
+                <div className="voice-report-box">
+                  <div className="voice-report-header">
+                    <span className="voice-report-title">
+                      <Mic size={15} style={{ marginRight: 6, verticalAlign: -2 }} />
+                      {t.report.voiceReporting || 'Voice Reporting'}
+                    </span>
+                    <select
+                      value={voiceLang}
+                      onChange={e => setVoiceLang(e.target.value)}
+                      className="voice-lang-select"
+                    >
+                      {VOICE_LANGS.map(l => (
+                        <option key={l.value} value={l.value}>{l.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <p className="voice-report-hint">
+                    {t.report.voiceHint || 'Press the mic and speak your symptoms in your language — it will be auto-filled below.'}
+                  </p>
+                  <div className="voice-controls">
+                    {!voiceListening ? (
+                      <button type="button" className="btn-voice" onClick={startVoice}>
+                        <Mic size={18} />
+                        {t.report.voiceStart || 'Start Speaking'}
+                      </button>
+                    ) : (
+                      <button type="button" className="btn-voice listening" onClick={stopVoice}>
+                        <MicOff size={18} />
+                        {t.report.voiceStop || 'Stop'}
+                        <span className="voice-pulse" />
+                      </button>
+                    )}
+                    {customSymptom && (
+                      <button type="button" className="btn-secondary" onClick={() => setCustomSymptom('')} title="Clear">
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                  {voiceError && <p className="status-msg error" style={{ marginTop: 8 }}>{voiceError}</p>}
+                </div>
+
+                {/* Custom / transcribed symptom text */}
+                <div style={{ marginTop: 12 }}>
+                  <label>{t.report.describeSymptom || 'Describe Symptom / Voice Transcript'} <span style={{ fontWeight: 400, opacity: 0.6 }}>{t.report.describeSymptomOptional || '(Optional)'}</span></label>
+                  <textarea
+                    rows={3}
+                    value={customSymptom}
+                    onChange={e => setCustomSymptom(e.target.value)}
+                    placeholder={t.report.describeSymptomPlaceholder || 'Type here, or use Voice Reporting above to speak your symptoms...'}
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
               </div>
             </div>
 
@@ -358,6 +580,38 @@ export default function ReportCase() {
               </div>
             </div>
           )}
+          {/* ── Temporary Medication (HIGH / CRITICAL only) ── */}
+          {['high', 'critical'].includes(result.riskLevel?.toLowerCase()) && (() => {
+            const guide = getTempMeds(result.possibleDiseasesJson)
+            return (
+              <div className="temp-meds-panel">
+                <div className="temp-meds-header">
+                  <span className="temp-meds-icon">⚕️</span>
+                  <div>
+                    <div className="temp-meds-title">{t.report.tempMedsTitle || 'Temporary Medication Guide'}</div>
+                    <div className="temp-meds-sub">{t.report.tempMedsSub || 'For:'} <strong>{guide.name}</strong> {t.report.tempMedsAwaiting || '— while awaiting veterinary care'}</div>
+                  </div>
+                </div>
+
+                <div className="temp-meds-warning">
+                  ⚠️ <strong>{t.report.tempMedsFirstAidOnly || 'This is first-aid only.'}</strong> {t.report.tempMedsWarning || 'Contact a vet immediately. Do not replace professional diagnosis with this guide.'}
+                </div>
+
+                <div className="temp-meds-list">
+                  {guide.meds.map((m, i) => (
+                    <div key={i} className="temp-med-row">
+                      <div className="temp-med-name">{m.drug}</div>
+                      <div className="temp-med-details">
+                        <span className="temp-med-tag">{t.report.dose || 'Dose'}</span> {m.dose}
+                        <span className="temp-med-tag" style={{ marginLeft: 10 }}>{t.report.frequency || 'Frequency'}</span> {m.freq}
+                      </div>
+                      {m.note && <div className="temp-med-note">📌 {m.note}</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
         </section>
       )}
 

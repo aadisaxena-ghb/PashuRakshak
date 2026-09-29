@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { MapPin } from 'lucide-react'
+import { useEffect, useState, useMemo } from 'react'
+import { MapPin, Navigation } from 'lucide-react'
 import { api } from '../api/client.js'
 import RiskStamp from '../components/RiskStamp.jsx'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -16,6 +16,9 @@ export default function VetDesk() {
   const [newVet, setNewVet] = useState({ name: '', phone: '', assignedRegion: '', latitude: null, longitude: null })
   const [assigning, setAssigning] = useState(null)
   const [locating, setLocating] = useState(false)
+  
+  const [userLocation, setUserLocation] = useState(null)
+  const [userLocating, setUserLocating] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -45,6 +48,33 @@ export default function VetDesk() {
       () => setLocating(false)
     )
   }
+
+  const getUserLocation = () => {
+    if (!navigator.geolocation) return
+    setUserLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude })
+        setUserLocating(false)
+      },
+      () => setUserLocating(false)
+    )
+  }
+
+  const sortedVetsRecord = useMemo(() => {
+    if (!userLocation) return vets
+    return [...vets].map(v => {
+      if (v.latitude && v.longitude) {
+        return { ...v, distanceKm: distanceKm(userLocation.latitude, userLocation.longitude, v.latitude, v.longitude) }
+      }
+      return v
+    }).sort((a, b) => {
+      if (a.distanceKm != null && b.distanceKm != null) return a.distanceKm - b.distanceKm
+      if (a.distanceKm != null) return -1
+      if (b.distanceKm != null) return 1
+      return 0
+    })
+  }, [vets, userLocation])
 
   const addVet = async (e) => {
     e.preventDefault()
@@ -118,12 +148,22 @@ export default function VetDesk() {
       </section>
 
       <section className="panel">
-        <h2>{t.vets.onRecord}</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h2 style={{ margin: 0 }}>{t.vets.onRecord}</h2>
+          <button className="btn-secondary" onClick={getUserLocation} disabled={userLocating}>
+            <Navigation size={14} style={{ marginRight: 6, verticalAlign: -2 }} />
+            {userLocating ? (t.vets.locating || 'Locating…') : userLocation ? (t.vets.sortedByProximity || 'Sorted by proximity ✓') : (t.vets.useMyLocation || 'Use my location')}
+          </button>
+        </div>
+        
         <div className="ledger" style={{ marginBottom: 20 }}>
-          {vets.length === 0 && <div className="empty-state">{t.vets.noneYet}</div>}
-          {vets.map((v) => (
+          {sortedVetsRecord.length === 0 && <div className="empty-state">{t.vets.noneYet}</div>}
+          {sortedVetsRecord.map((v) => (
             <div key={v.id} className="ledger-row" style={{ gridTemplateColumns: '1fr 1fr 1fr auto' }}>
-              <div className="ledger-main"><div className="animal">{v.name}</div></div>
+              <div className="ledger-main">
+                <div className="animal">{v.name}</div>
+                {v.distanceKm != null && <div className="meta" style={{ color: '#d97706' }}>{v.distanceKm.toFixed(1)} {t.vets.kmAway || 'km away'}</div>}
+              </div>
               <div className="ledger-village">{v.assignedRegion}</div>
               <div className="ledger-village">{v.phone}</div>
               <div className="ledger-village">{v.latitude ? <MapPin size={16} color="var(--green)" /> : null}</div>

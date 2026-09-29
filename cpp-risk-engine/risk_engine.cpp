@@ -226,7 +226,7 @@ RiskResult assess(const CaseReport& r) {
     // Young or very old animals are more vulnerable.
     if (r.ageMonths < 6 || r.ageMonths > 96) score *= 1.10;
 
-    score = std::clamp(score, 0.0, 1.0);
+    score = std::max(0.0, std::min(1.0, score));
     result.score = score;
 
     if (score >= 0.75) {

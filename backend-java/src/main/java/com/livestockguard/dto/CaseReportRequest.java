@@ -27,6 +27,12 @@ public class CaseReportRequest {
     private Double longitude;
     private Boolean vaccinated = false;
     private Integer daysSinceOnset = 0;
+    
+    // Optional specifications
+    private Double height;
+    private Double weight;
+    private String unit;
+
     private String photoUrl;
 
     // Pre-computed result from /api/photo-analysis (JSON string), if the
@@ -67,6 +73,15 @@ public class CaseReportRequest {
 
     public Integer getDaysSinceOnset() { return daysSinceOnset; }
     public void setDaysSinceOnset(Integer daysSinceOnset) { this.daysSinceOnset = daysSinceOnset; }
+
+    public Double getHeight() { return height; }
+    public void setHeight(Double height) { this.height = height; }
+
+    public Double getWeight() { return weight; }
+    public void setWeight(Double weight) { this.weight = weight; }
+
+    public String getUnit() { return unit; }
+    public void setUnit(String unit) { this.unit = unit; }
 
     public String getPhotoUrl() { return photoUrl; }
     public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }

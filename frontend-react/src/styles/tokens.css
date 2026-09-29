@@ -9,15 +9,15 @@
    --------------------------------------------------------------------- */
 :root {
   /* Palette */
-  --ink: #1b2b22;
-  --ink-soft: #5b6b5f;
-  --bg: #f5f9f5;
+  --ink: #111827;
+  --ink-soft: #4b5563;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-tint: #eef6ee;
+  --surface-tint: #f0fdf4;
 
-  --green: #1f7a4d;
-  --green-deep: #0f5132;
-  --green-soft: rgba(31, 122, 77, 0.10);
+  --green: #10b981;
+  --green-deep: #059669;
+  --green-soft: rgba(16, 185, 129, 0.10);
 
   --saffron: #e8871e;
   --saffron-soft: rgba(232, 135, 30, 0.12);

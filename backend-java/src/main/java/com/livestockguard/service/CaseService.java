@@ -59,6 +59,9 @@ public class CaseService {
         animal.setOwnerPhone(request.getOwnerPhone());
         animal.setVillage(request.getVillage());
         animal.setVaccinated(Boolean.TRUE.equals(request.getVaccinated()));
+        animal.setHeight(request.getHeight());
+        animal.setWeight(request.getWeight());
+        animal.setUnit(request.getUnit());
         animal = animalRepository.save(animal);
 
         Instant windowStart = Instant.now().minus(hotspotWindowDays, ChronoUnit.DAYS);

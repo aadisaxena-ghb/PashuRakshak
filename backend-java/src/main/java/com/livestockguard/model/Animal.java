@@ -18,6 +18,12 @@ public class Animal {
     private String ownerPhone;
     private String village;
     private Boolean vaccinated = false;
+    
+    // Optional specifications
+    private Double height;
+    private Double weight;
+    private String unit; // e.g., "cm/kg" or "inches/lbs"
+
     private Instant createdAt = Instant.now();
 
     public Long getId() { return id; }
@@ -43,6 +49,15 @@ public class Animal {
 
     public Boolean getVaccinated() { return vaccinated; }
     public void setVaccinated(Boolean vaccinated) { this.vaccinated = vaccinated; }
+
+    public Double getHeight() { return height; }
+    public void setHeight(Double height) { this.height = height; }
+
+    public Double getWeight() { return weight; }
+    public void setWeight(Double weight) { this.weight = weight; }
+
+    public String getUnit() { return unit; }
+    public void setUnit(String unit) { this.unit = unit; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
