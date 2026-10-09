@@ -113,10 +113,10 @@ Respond with ONLY a single JSON object with this exact shape:
             const msg = data.error.message || '';
             lastError = msg;
             if (msg.includes('high demand') || msg.includes('quota') || msg.includes('429') || msg.includes('503')) {
-              continue; // try next attempt or next model
+              continue;
             }
             if (msg.includes('not found') || data.error.code === 404) {
-              break; // skip to next model
+              break;
             }
             throw new Error(msg);
           }
@@ -125,24 +125,33 @@ Respond with ONLY a single JSON object with this exact shape:
           const parts = candidate?.content?.parts || [];
           let rawText = '';
           for (const p of parts) {
-            if (p.text && !p.thought) {
+            if (p.text) {
               rawText += p.text;
             }
           }
+
           if (!rawText && parts.length > 0) {
-            rawText = parts[parts.length - 1].text || '';
+            rawText = parts[0].text || '';
           }
 
           if (!rawText) {
             throw new Error('No text returned in candidate parts');
           }
 
-          let cleanText = rawText.trim();
-          if (cleanText.startsWith('```')) {
-            cleanText = cleanText.replace(/^```(json)?/, '').replace(/```$/, '').trim();
+          let parsed = null;
+          let cleanText = rawText.trim().replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '').trim();
+          try {
+            parsed = JSON.parse(cleanText);
+          } catch (e) {
+            const firstBrace = cleanText.indexOf('{');
+            const lastBrace = cleanText.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace > firstBrace) {
+              parsed = JSON.parse(cleanText.substring(firstBrace, lastBrace + 1));
+            } else {
+              throw e;
+            }
           }
 
-          const parsed = JSON.parse(cleanText);
           parsed.configured = true;
           return res.status(200).json(parsed);
         } catch (err) {
