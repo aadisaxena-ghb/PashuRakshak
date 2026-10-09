@@ -28,6 +28,10 @@ export default async function handler(req, res) {
       });
     }
 
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'Missing imageBase64' });
+    }
+
     const systemPrompt = `You are an expert veterinary visual screening assistant for rural livestock field workers in India.
 Your primary responsibility is to strictly verify whether the photo shows a genuine sick or injured farm/domestic animal of the specified species.
 
@@ -84,46 +88,78 @@ Respond with ONLY a single JSON object with this exact shape:
       }
     };
 
-    const model = 'gemini-3.8-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': effectiveKey
-      },
-      body: JSON.stringify(payload)
-    });
+    const models = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
+    let lastError = null;
 
-    const data = await response.json();
-    if (data.error) {
-      throw new Error(data.error.message || 'Gemini API returned error');
-    }
+    for (const model of models) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          if (attempt > 0) {
+            await new Promise(r => setTimeout(r, 600));
+          }
 
-    const candidate = data.candidates?.[0];
-    const parts = candidate?.content?.parts || [];
-    let rawText = '';
-    for (const p of parts) {
-      if (p.text && !p.thought) {
-        rawText += p.text;
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': effectiveKey
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+          if (data.error) {
+            const msg = data.error.message || '';
+            lastError = msg;
+            if (msg.includes('high demand') || msg.includes('quota') || msg.includes('429') || msg.includes('503')) {
+              continue; // try next attempt or next model
+            }
+            if (msg.includes('not found') || data.error.code === 404) {
+              break; // skip to next model
+            }
+            throw new Error(msg);
+          }
+
+          const candidate = data.candidates?.[0];
+          const parts = candidate?.content?.parts || [];
+          let rawText = '';
+          for (const p of parts) {
+            if (p.text && !p.thought) {
+              rawText += p.text;
+            }
+          }
+          if (!rawText && parts.length > 0) {
+            rawText = parts[parts.length - 1].text || '';
+          }
+
+          if (!rawText) {
+            throw new Error('No text returned in candidate parts');
+          }
+
+          let cleanText = rawText.trim();
+          if (cleanText.startsWith('```')) {
+            cleanText = cleanText.replace(/^```(json)?/, '').replace(/```$/, '').trim();
+          }
+
+          const parsed = JSON.parse(cleanText);
+          parsed.configured = true;
+          return res.status(200).json(parsed);
+        } catch (err) {
+          lastError = err.message;
+        }
       }
     }
-    if (!rawText && parts.length > 0) {
-      rawText = parts[parts.length - 1].text || '';
-    }
 
-    if (!rawText) {
-      throw new Error('No text returned in candidate parts');
-    }
-
-    let cleanText = rawText.trim();
-    if (cleanText.startsWith('```')) {
-      cleanText = cleanText.replace(/^```(json)?/, '').replace(/```$/, '').trim();
-    }
-
-    const parsed = JSON.parse(cleanText);
-    parsed.configured = true;
-    return res.status(200).json(parsed);
+    return res.status(200).json({
+      configured: true,
+      imageUsable: false,
+      retakeMessage: `AI Vision analysis is temporarily busy (${lastError || 'rate limit'}). Please try again in a moment.`,
+      visibleSigns: [],
+      possibleConditions: [],
+      firstAid: [],
+      disclaimer: 'AI Vision service retry.'
+    });
   } catch (error) {
     return res.status(500).json({
       configured: true,
