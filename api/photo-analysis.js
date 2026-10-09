@@ -84,68 +84,46 @@ Respond with ONLY a single JSON object with this exact shape:
       }
     };
 
-    const models = ['gemini-3.8-flash', 'gemini-2.5-flash'];
-    let lastError = null;
+    const model = 'gemini-3.8-flash';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': effectiveKey
+      },
+      body: JSON.stringify(payload)
+    });
 
-    for (const model of models) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': effectiveKey
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-        if (data.error) {
-          if (data.error.message?.includes('not found') || data.error.code === 404) {
-            lastError = data.error.message;
-            continue;
-          }
-          throw new Error(data.error.message || 'Gemini API returned error');
-        }
-
-        const candidate = data.candidates?.[0];
-        const parts = candidate?.content?.parts || [];
-        let rawText = '';
-        for (const p of parts) {
-          if (p.text && !p.thought) {
-            rawText += p.text;
-          }
-        }
-        if (!rawText && parts.length > 0) {
-          rawText = parts[parts.length - 1].text || '';
-        }
-
-        if (!rawText) {
-          throw new Error('No text returned in candidate parts');
-        }
-
-        let cleanText = rawText.trim();
-        if (cleanText.startsWith('```')) {
-          cleanText = cleanText.replace(/^```(json)?/, '').replace(/```$/, '').trim();
-        }
-
-        const parsed = JSON.parse(cleanText);
-        parsed.configured = true;
-        return res.status(200).json(parsed);
-      } catch (err) {
-        lastError = err.message;
-      }
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error.message || 'Gemini API returned error');
     }
 
-    return res.status(200).json({
-      configured: true,
-      imageUsable: false,
-      retakeMessage: `AI Vision check failed: ${lastError || 'Could not reach model'}. Please try again.`,
-      visibleSigns: [],
-      possibleConditions: [],
-      firstAid: [],
-      disclaimer: 'AI Vision service error.'
-    });
+    const candidate = data.candidates?.[0];
+    const parts = candidate?.content?.parts || [];
+    let rawText = '';
+    for (const p of parts) {
+      if (p.text && !p.thought) {
+        rawText += p.text;
+      }
+    }
+    if (!rawText && parts.length > 0) {
+      rawText = parts[parts.length - 1].text || '';
+    }
+
+    if (!rawText) {
+      throw new Error('No text returned in candidate parts');
+    }
+
+    let cleanText = rawText.trim();
+    if (cleanText.startsWith('```')) {
+      cleanText = cleanText.replace(/^```(json)?/, '').replace(/```$/, '').trim();
+    }
+
+    const parsed = JSON.parse(cleanText);
+    parsed.configured = true;
+    return res.status(200).json(parsed);
   } catch (error) {
     return res.status(500).json({
       configured: true,
