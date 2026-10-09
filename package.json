@@ -1,0 +1,9 @@
+{
+  "name": "pashurakshak",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "cd frontend-react && npm install && npm run build"
+  }
+}

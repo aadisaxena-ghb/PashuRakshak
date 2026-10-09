@@ -1,0 +1,12 @@
+Dockerfile
+backend-java/
+cpp-risk-engine/
+node_modules/
+frontend-react/node_modules/
+.git/
+*.jar
+*.exe
+*.o
+*.log
+*.mv.db
+*.trace.db
