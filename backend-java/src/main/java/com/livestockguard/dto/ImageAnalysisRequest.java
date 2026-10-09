@@ -10,6 +10,7 @@ public class ImageAnalysisRequest {
     private String mediaType; // e.g. "image/jpeg", "image/png"
 
     private String species; // optional context, e.g. "cattle"
+    private String apiKey; // optional client-provided key
 
     public String getImageBase64() { return imageBase64; }
     public void setImageBase64(String imageBase64) { this.imageBase64 = imageBase64; }
@@ -19,4 +20,7 @@ public class ImageAnalysisRequest {
 
     public String getSpecies() { return species; }
     public void setSpecies(String species) { this.species = species; }
+
+    public String getApiKey() { return apiKey; }
+    public void setApiKey(String apiKey) { this.apiKey = apiKey; }
 }
